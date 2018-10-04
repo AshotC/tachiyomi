@@ -1,16 +1,11 @@
-===[WEEK 2]===
 COMPLETE:
-* Actually Correct Environment Setup (Android Studio)
-* Gather screen-shots of some personally found bugs
+* Environment Setup (Android Studio)
 
 IN PROGRESS:
 * Learning Kotlin
 * Understand Codebase
-* Identify error prone sections of code
-* Gathering known bugs to jumpstart test case identification
 
 TO DO:
-* Create local dummy API for API testing
 * Generate Unit Tests
 * Generate Integration Tests
 * Fix Project Proposal
