@@ -18,18 +18,30 @@ import org.robolectric.annotation.Config
 class CategoryTest {
 
     lateinit var db: DatabaseHelper
+    var mangaCount = 0
 
+    @Test
+    fun testHasNoCategories() {
+        val categories = db.getCategories().executeAsBlocking()
+        assertThat(categories).hasSize(0)
+    }
+
+    @Test
+    fun testHasNoLibraryMangas() {
+        val mangas = db.getLibraryMangas().executeAsBlocking()
+        assertThat(mangas).hasSize(0)
+    }
+
+    // Attempt to remove this setup stage later for independent unit testing
     @Before
     fun setup() {
         val app = RuntimeEnvironment.application
         db = DatabaseHelper(app)
 
         // Create 5 manga
-        createManga("a")
-        createManga("b")
-        createManga("c")
-        createManga("d")
-        createManga("e")
+        for (i in 1..5) {
+            createManga("testManga" + (mangaCount++))
+        }
     }
 
     @Test
@@ -50,16 +62,7 @@ class CategoryTest {
 
     @Test
     fun testHasCorrectFavorites() {
-        val m = Manga.create(0)
-        m.title = "title"
-        m.author = ""
-        m.artist = ""
-        m.thumbnail_url = ""
-        m.genre = "a list of genres"
-        m.description = "long description"
-        m.url = "url to manga"
-        m.favorite = false
-        db.insertManga(m).executeAsBlocking()
+        createNonfavoriteManga("testManga" + (mangaCount++))
         val mangas = db.getLibraryMangas().executeAsBlocking()
         assertThat(mangas).hasSize(5)
     }
@@ -98,6 +101,19 @@ class CategoryTest {
         m.description = "long description"
         m.url = "url to manga"
         m.favorite = true
+        db.insertManga(m).executeAsBlocking()
+    }
+
+    private fun createNonfavoriteManga(title: String) {
+        val m = Manga.create(0)
+        m.title = title
+        m.author = ""
+        m.artist = ""
+        m.thumbnail_url = ""
+        m.genre = "a list of genres"
+        m.description = "long description"
+        m.url = "url to manga"
+        m.favorite = false
         db.insertManga(m).executeAsBlocking()
     }
 
