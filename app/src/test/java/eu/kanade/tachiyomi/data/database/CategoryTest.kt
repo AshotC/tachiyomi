@@ -18,14 +18,23 @@ import org.robolectric.annotation.Config
 class CategoryTest {
 
     lateinit var db: DatabaseHelper
-    var mangaCount = 0
+    var totalManagaCount = 0
 
+    // Attempt to remove this setup stage later for independent unit testing
+    @Before
+    fun setupDatabase() {
+        val app = RuntimeEnvironment.application
+        db = DatabaseHelper(app)
+    }
+
+    // Base case for no catagories
     @Test
     fun testHasNoCategories() {
         val categories = db.getCategories().executeAsBlocking()
         assertThat(categories).hasSize(0)
     }
 
+    // Base case for no manga
     @Test
     fun testHasNoLibraryMangas() {
         val mangas = db.getLibraryMangas().executeAsBlocking()
@@ -34,21 +43,18 @@ class CategoryTest {
 
     // Attempt to remove this setup stage later for independent unit testing
     @Before
-    fun setup() {
-        val app = RuntimeEnvironment.application
-        db = DatabaseHelper(app)
-
+    fun setupManga() {
         // Create 5 manga
         for (i in 1..5) {
-            createManga("testManga" + (mangaCount++))
+            createManga(Manga.create(0), "testManga" + (totalManagaCount++))
         }
     }
 
     @Test
     fun testHasCategories() {
         // Create 2 categories
-        createCategory("Reading")
-        createCategory("Hold")
+        createCategory(CategoryImpl(), "Reading")
+        createCategory(CategoryImpl(), "Hold")
 
         val categories = db.getCategories().executeAsBlocking()
         assertThat(categories).hasSize(2)
@@ -57,21 +63,21 @@ class CategoryTest {
     @Test
     fun testHasLibraryMangas() {
         val mangas = db.getLibraryMangas().executeAsBlocking()
-        assertThat(mangas).hasSize(5)
+        assertThat(mangas).hasSize(totalManagaCount)
     }
 
     @Test
     fun testHasCorrectFavorites() {
-        createNonfavoriteManga("testManga" + (mangaCount++))
+        createNonfavoriteManga(Manga.create(0), "testManga" + (totalManagaCount++))
         val mangas = db.getLibraryMangas().executeAsBlocking()
-        assertThat(mangas).hasSize(5)
+        assertThat(mangas).hasSize(totalManagaCount)
     }
 
     @Test
     fun testMangaInCategory() {
         // Create 2 categories
-        createCategory("Reading")
-        createCategory("Hold")
+        createCategory(CategoryImpl(), "Reading")
+        createCategory(CategoryImpl(), "Hold")
 
         // It should not have 0 as id
         val c = db.getCategories().executeAsBlocking()[0]
@@ -91,8 +97,28 @@ class CategoryTest {
         }
     }
 
-    private fun createManga(title: String) {
-        val m = Manga.create(0)
+    @Test
+    fun testCatagoriesHaveCorrectNames() {
+        createCategory(CategoryImpl(), "Reading")
+        createCategory(CategoryImpl(), "Hold")
+
+        val c = db.getCategories().executeAsBlocking()[0]
+        assertThat(c.name).isEqualTo("Reading")
+
+        c = db.getCategories().executeAsBlocking()[1]
+        assertThat(c.name).isEqualTo("Hold")
+    }
+
+    @Test
+    fun testDefaultCatagoryIsCreated() {
+        createCategory()
+        val c = db.getCategories().executeAsBlocking()[0]
+        assertThat(c.name).isEqualTo("Default")
+    }
+
+    // Helper functions below
+    
+    private fun createManga(m: Manga, title: String) {
         m.title = title
         m.author = ""
         m.artist = ""
@@ -104,8 +130,7 @@ class CategoryTest {
         db.insertManga(m).executeAsBlocking()
     }
 
-    private fun createNonfavoriteManga(title: String) {
-        val m = Manga.create(0)
+    private fun createNonfavoriteManga(m: Manga, title: String) {
         m.title = title
         m.author = ""
         m.artist = ""
@@ -117,10 +142,8 @@ class CategoryTest {
         db.insertManga(m).executeAsBlocking()
     }
 
-    private fun createCategory(name: String) {
-        val c = CategoryImpl()
+    private fun createCategory(c: CatagoryImpl: name: String) {
         c.name = name
         db.insertCategory(c).executeAsBlocking()
     }
-
 }
