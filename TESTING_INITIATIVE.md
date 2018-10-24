@@ -8,10 +8,10 @@ IN PROGRESS:
 * Understand Codebase
 * Identify error prone sections of code
 * Gathering known bugs to jumpstart test case identification
+* Generate Unit Tests
 
 TO DO:
 * Create local dummy API for API testing
-* Generate Unit Tests
 * Generate Integration Tests
 * Fix Project Proposal
 
