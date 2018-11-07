@@ -149,6 +149,57 @@ class BackupTest {
     }
 
     /**
+     * Test if restore of empty manga database works
+     */
+    @Test
+    fun testRestoreNoManga() {
+        // Initialize json with version 2
+        initializeJsonTest(2)
+
+        var favoriteManga = backupManager.databaseHelper.getFavoriteMangas().executeAsBlocking()
+        assertThat(favoriteManga).hasSize(0)
+
+        // Update json with all options enabled
+        mangaEntries.add(backupManager.backupMangaObject(manga,1))
+
+        // Restore local (lack of) manga
+        backupManager.restoreMangaNoFetch(manga,dbManga)
+
+        // Test if restore successful
+        assertThat(favoriteManga).hasSize(0)
+
+        // Clear database to test manga fetch
+        clearDatabase()
+
+        // Test if successful
+        favoriteManga = backupManager.databaseHelper.getFavoriteMangas().executeAsBlocking()
+        assertThat(favoriteManga).hasSize(0)
+
+        // Restore Json
+        // Create JSON from manga to test parser
+        val json = backupManager.parser.toJsonTree(manga)
+        // Restore JSON from manga to test parser
+        val jsonManga = backupManager.parser.fromJson<MangaImpl>(json)
+
+        // Restore manga with fetch observable
+        val networkManga = getSingleManga("One Piece")
+        networkManga.description = "This is a description"
+        `when`(source.fetchMangaDetails(jsonManga)).thenReturn(Observable.just(networkManga))
+
+        val obs = backupManager.restoreMangaFetchObservable(source, jsonManga)
+        val testSubscriber = TestSubscriber<Manga>()
+        obs.subscribe(testSubscriber)
+
+        testSubscriber.assertNoErrors()
+
+        // Check if restore successful
+        val dbCats = backupManager.databaseHelper.getFavoriteMangas().executeAsBlocking()
+        assertThat(dbCats).hasSize(1)
+        assertThat(dbCats[0].viewer).isEqualTo(3)
+        assertThat(dbCats[0].description).isEqualTo("This is a description")
+    }
+
+    /**
      * Test if restore of manga is successful
      */
     @Test
