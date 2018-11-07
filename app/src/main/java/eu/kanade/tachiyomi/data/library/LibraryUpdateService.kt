@@ -331,7 +331,7 @@ class LibraryUpdateService(
             mangaChapters.find { mangaChapter -> mangaChapter.url == it.url }!!
         }
         // We don't want to start downloading while the library is updating, because websites
-        // may don't like it and they could ban the user.
+        // may not like it and they could ban the user.
         downloadManager.downloadChapters(manga, dbChapters, false)
     }
 
