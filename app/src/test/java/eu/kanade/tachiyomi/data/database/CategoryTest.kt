@@ -46,18 +46,18 @@ class CategoryTest {
     fun setupManga() {
         // Create 5 manga
         for (i in 1..5) {
-            createManga(Manga.create(0), "testManga" + (totalManagaCount++))
+            createManga(Manga.create(0), "testManga_" + (totalManagaCount++))
         }
     }
 
     @Test
     fun testHasCategories() {
-        // Create 2 categories
-        createCategory(CategoryImpl(), "Reading")
-        createCategory(CategoryImpl(), "Hold")
-
-        val categories = db.getCategories().executeAsBlocking()
-        assertThat(categories).hasSize(2)
+        // Test 1-5 catagories
+        for (i in 1..5) {}
+            createCategory(CategoryImpl(), "Catagory_"+i)
+            val categories = db.getCategories().executeAsBlocking()
+            assertThat(categories).hasSize(i)
+        }
     }
 
     @Test
@@ -93,6 +93,36 @@ class CategoryTest {
         for (manga in mangas) {
             if (manga.id == m.id) {
                 assertThat(manga.category).isEqualTo(c.id)
+            }
+        }
+    }
+
+    @Test
+    fun testMangaChangeCategory() {
+        // Create 2 categories
+        createCategory(CategoryImpl(), "Reading")
+        createCategory(CategoryImpl(), "Hold")
+
+        // It should not have 0 as id
+        val c = db.getCategories().executeAsBlocking()[0]
+        assertThat(c.id).isNotZero()
+
+        // Add a manga to a category
+        val m = db.getMangas().executeAsBlocking()[0]
+        val mc = MangaCategory.create(m, c)
+        db.insertMangaCategory(mc).executeAsBlocking()
+
+        // Add a manga to a new category
+        val cNew = db.getCategories().executeAsBlocking()[0]
+        val mNew = db.getMangas().executeAsBlocking()[0]
+        val mcNew = MangaCategory.create(m, c)
+        db.insertMangaCategory(mc).executeAsBlocking()
+
+        // Get mangas from library and assert manga category is the same
+        val mangas = db.getLibraryMangas().executeAsBlocking()
+        for (manga in mangas) {
+            if (manga.id == mNew.id) {
+                assertThat(manga.category).isEqualTo(cNew.id)
             }
         }
     }
