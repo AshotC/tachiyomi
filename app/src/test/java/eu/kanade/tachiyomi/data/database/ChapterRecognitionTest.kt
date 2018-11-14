@@ -48,6 +48,30 @@ class ChapterRecognitionTest {
     }
 
     /**
+     * Ch.xx check if result is consistent across multiple runs of ChapterRecognition
+     */
+    @Test fun recheckTest() {
+        createManga("Test Manga Name")
+
+        createChapter("Test Manga Name Vol.1 Ch.4: Misrepresentation")
+        for (i in 1..5) {
+            ChapterRecognition.parseChapterNumber(chapter, manga)
+            assertThat(chapter.chapter_number).isEqualTo(4f)
+        }
+    }
+
+    /**
+     * Ch.xx check if manga name removed from chapter name
+     */
+    @Test fun checkMangaNameRemovalTest() {
+        createManga("Test Manga Name")
+
+        createChapter("Test Manga Name Vol.1 Ch.4: Misrepresentation")
+        ChapterRecognition.parseChapterNumber(chapter, manga)
+        assertThat(chapter.name).isEqualTo("Vol.1 Ch.4: Misrepresentation")
+    }
+
+    /**
      * Ch.xx base case
      */
     @Test fun ChCaseBase() {
@@ -331,6 +355,15 @@ class ChapterRecognitionTest {
      */
     @Test fun unParsableCase() {
         createChapter("Foo")
+        ChapterRecognition.parseChapterNumber(chapter, manga)
+        assertThat(chapter.chapter_number).isEqualTo(-1f)
+    }
+
+    /**
+     * empty chapter
+     */
+    @Test fun emptyCase() {
+        createChapter("")
         ChapterRecognition.parseChapterNumber(chapter, manga)
         assertThat(chapter.chapter_number).isEqualTo(-1f)
     }

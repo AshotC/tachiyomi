@@ -150,24 +150,24 @@ class CategoryTest {
     
     private fun createManga(m: Manga, title: String) {
         m.title = title
-        m.author = ""
-        m.artist = ""
-        m.thumbnail_url = ""
-        m.genre = "a list of genres"
-        m.description = "long description"
-        m.url = "url to manga"
+        m.author = "createMangaAuthor"
+        m.artist = "createMangaArtist"
+        m.thumbnail_url = "createMangaThumbnail"
+        m.genre = "createManga genre list"
+        m.description = "createManga long discription"
+        m.url = "createMangaUrl"
         m.favorite = true
         db.insertManga(m).executeAsBlocking()
     }
 
     private fun createNonfavoriteManga(m: Manga, title: String) {
         m.title = title
-        m.author = ""
-        m.artist = ""
-        m.thumbnail_url = ""
-        m.genre = "a list of genres"
-        m.description = "long description"
-        m.url = "url to manga"
+        m.author = "createNonfavoriteMangaAuthor"
+        m.artist = "createNonfavoriteMangaArtist"
+        m.thumbnail_url = "createNonfavoriteMangaThumbnail"
+        m.genre = "createNonfavoriteManga genre list"
+        m.description = "createNonfavoriteManga long discription"
+        m.url = "createNonfavoriteMangaUrl"
         m.favorite = false
         db.insertManga(m).executeAsBlocking()
     }
