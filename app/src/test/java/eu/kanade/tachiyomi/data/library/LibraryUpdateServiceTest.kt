@@ -66,6 +66,21 @@ class LibraryUpdateServiceTest {
                 .get()
     }
 
+    // Manga with no chapters
+    @Test
+    fun testUpdateMangaWhenNoChapters() {
+        val manga = createManga("/manga1")[0]
+        manga.id = 1L
+        service.db.insertManga(manga).executeAsBlocking()
+
+        `when`(source.fetchChapterList(manga)).thenReturn(Observable.just())
+
+        service.updateManga(manga).subscribe()
+
+        assertThat(service.db.getChapters(manga).executeAsBlocking()).hasSize(0)
+    }
+
+    // Manga with chapters test
     @Test
     fun testUpdateManga() {
         val manga = createManga("/manga1")[0]
@@ -81,6 +96,30 @@ class LibraryUpdateServiceTest {
         assertThat(service.db.getChapters(manga).executeAsBlocking()).hasSize(2)
     }
 
+    // Manga recieves updated chapters
+    @Test
+    fun testUpdateMangaNewChapter() {
+        val manga = createManga("/manga1")[0]
+        manga.id = 1L
+        service.db.insertManga(manga).executeAsBlocking()
+
+        val sourceChapters = createChapters("/chapter1", "/chapter2")
+        `when`(source.fetchChapterList(manga)).thenReturn(Observable.just(sourceChapters))
+        service.updateManga(manga).subscribe()
+        assertThat(service.db.getChapters(manga).executeAsBlocking()).hasSize(2)
+
+        sourceChapters = createChapters("/chapter1", "/chapter2", "/chapter3")
+        `when`(source.fetchChapterList(manga)).thenReturn(Observable.just(sourceChapters))
+        service.updateManga(manga).subscribe()
+        assertThat(service.db.getChapters(manga).executeAsBlocking()).hasSize(3)
+
+        sourceChapters = createChapters("/chapter1", "/chapter2", "/chapter3", "/chapter4", "/chapter5")
+        `when`(source.fetchChapterList(manga)).thenReturn(Observable.just(sourceChapters))
+        service.updateManga(manga).subscribe()
+        assertThat(service.db.getChapters(manga).executeAsBlocking()).hasSize(5)
+    }
+
+    // A manga fails to update during library update
     @Test
     fun testContinuesUpdatingWhenAMangaFails() {
         var favManga = createManga("/manga1", "/manga2", "/manga3")
@@ -110,7 +149,7 @@ class LibraryUpdateServiceTest {
         for (url in urls) {
             val c = Chapter.create()
             c.url = url
-            c.name = url.substring(1)
+            c.name = url.substring(1) + "_test"
             list.add(c)
         }
         return list
@@ -121,7 +160,7 @@ class LibraryUpdateServiceTest {
         for (url in urls) {
             val m = LibraryManga()
             m.url = url
-            m.title = url.substring(1)
+            m.title = url.substring(1) + "_test"
             m.favorite = true
             list.add(m)
         }

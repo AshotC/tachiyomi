@@ -11,9 +11,9 @@ class CloudflareInterceptor : Interceptor {
 
     private val operationPattern = Regex("""setTimeout\(function\(\)\{\s+(var (?:\w,)+f.+?\r?\n[\s\S]+?a\.value =.+?)\r?\n""")
     
-    private val passPattern = Regex("""name="pass" value="(.+?)"""")
+    private val passPattern = Regex("""name="pass" value="(.+?)""")
 
-    private val challengePattern = Regex("""name="jschl_vc" value="(\w+)"""")
+    private val challengePattern = Regex("""name="jschl_vc" value="(\w+)""")
 
     private val serverCheck = arrayOf("cloudflare-nginx", "cloudflare")
 

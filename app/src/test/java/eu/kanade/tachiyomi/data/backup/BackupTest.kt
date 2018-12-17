@@ -448,7 +448,7 @@ class BackupTest {
     private fun getSingleManga(title: String): MangaImpl {
         val manga = MangaImpl()
         manga.source = 1
-        manga.title = title
+        manga.title = title + "_test"
         manga.url = "/manga/$title"
         manga.favorite = true
         return manga
@@ -456,7 +456,7 @@ class BackupTest {
 
     private fun getSingleChapter(name: String): ChapterImpl {
         val chapter = ChapterImpl()
-        chapter.name = name
+        chapter.name = name + "_test"
         chapter.url = "/read-online/$name-page-1.html"
         return chapter
     }
